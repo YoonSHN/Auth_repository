@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>이메일 인증 예제</title>
+    <style>
+        #verify-section { display: none; margin-top: 1em; }
+        input, button { padding: .5em; font-size: 1em; }
+    </style>
+</head>
+<body>
+<h1>이메일 인증</h1>
+
+<!-- 1단계: 이메일 입력 -->
+<div id="email-section">
+    <input id="email" type="email" placeholder="이메일 주소"/>
+    <button id="send-btn">인증메일 받기</button>
+</div>
+
+<!-- 2단계: 인증번호 입력 -->
+<div id="verify-section">
+    <input id="code" type="text" placeholder="인증번호 입력"/>
+    <button id="verify-btn">인증 확인</button>
+</div>
+
+<script>
+    const sendBtn   = document.getElementById('send-btn');
+    const verifySec = document.getElementById('verify-section');
+    const verifyBtn = document.getElementById('verify-btn');
+
+    sendBtn.addEventListener('click', async () => {
+        const email = document.getElementById('email').value.trim();
+        if (!email) { return alert('이메일을 입력해주세요.'); }
+        const res = await fetch(`/auth/email/send?email=${encodeURIComponent(email)}`, { method: 'POST' });
+        if (res.ok) {
+            alert('인증 메일이 발송되었습니다.');
+            document.getElementById('email-section').style.display = 'none';
+            verifySec.style.display = 'block';
+        } else {
+            alert('발송 실패: ' + await res.text());
+        }
+    });
+
+    verifyBtn.addEventListener('click', async () => {
+        const email = document.getElementById('email').value.trim();
+        const code  = document.getElementById('code').value.trim();
+        if (!code) { return alert('인증번호를 입력해주세요.'); }
+        const res = await fetch(
+            `/auth/email/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`,
+            { method: 'POST' }
+        );
+        if (res.ok) {
+            alert('인증 성공!');
+        } else {
+            alert('인증 실패: ' + await res.text());
+        }
+    });
+</script>
+</body>
+</html>
